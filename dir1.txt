@@ -1,0 +1,8 @@
+.\dir1.txt
+.\dir2.txt
+.\dirlist.py
+.\t1
+.\t1\blub.txt
+.\t1\test
+.\t1\test1.txt
+.\t2
