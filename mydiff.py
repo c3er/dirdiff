@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+
 # Based on "diff.py" from Python distribution (Tools/scripts)
 
 
@@ -10,7 +11,6 @@
 * context:  highlights clusters of changes in a before/after format.
 * unified:  highlights clusters of changes in an inline format.
 * html:     generates side by side comparison with change highlights.
-
 """
 
 
@@ -46,29 +46,23 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', "--context", action='store_true', default=False, help='Produce a context format diff (default)')
     parser.add_argument('-u', "--unified", action='store_true', default=False, help='Produce a unified format diff')
-    parser.add_argument('-m', "--makehtml", type=str, default="", help='Name for HTML side by side diff file (can use -c and -l in conjunction)')
     parser.add_argument('-n', "--ndiff", action='store_true', default=False, help='Produce a ndiff format diff')
     parser.add_argument('-l', '--lines', type=int, default=3, help='Set number of context lines (default 3)')
-    parser.add_argument('-o', '--outfile', type=str, default="", help='Optional: Write diff to an output text file')
-    parser.add_argument('fromfile')
-    parser.add_argument('tofile')
+    parser.add_argument('-o', '--outfile', type=str, default="", help='Write diff to an output file. If the filename ends with ".html" a HTML side by side diff will be produced. All other endings will be treated as text containing the console output.')
+    parser.add_argument('fromfile', help="First file for diff")
+    parser.add_argument('tofile', help="Second file for diff")
     options = parser.parse_args()
 
     lines = options.lines
     fromfile = options.fromfile
     tofile = options.tofile
     
-    makehtml = False
-    if options.makehtml and options.outfile:
-        print("-m and -o not allowed together", file=sys.stderr)
-        sys.exit(1)
-    elif options.makehtml:
-        outfile = options.makehtml
-        makehtml = True
-    elif options.outfile:
+    if options.outfile:
         outfile = options.outfile
+        makehtml = outfile.endswith((".html", ".htm"))
     else:
         outfile = ""
+        makehtml = False
 
     fromdate = file_mtime(fromfile)
     todate = file_mtime(tofile)
@@ -91,6 +85,7 @@ def main():
     if outfile:
         with open(outfile, "w", encoding=ENCODING) as f:
             f.writelines(diff)
+        print("{} written".format(outfile))
     else:
         sys.stdout.writelines(diff)
 
