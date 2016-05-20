@@ -22,6 +22,9 @@ import datetime
 import difflib
 
 
+ENCODING = "utf8"
+
+
 def file_mtime(path):
     return (
         datetime.datetime
@@ -29,6 +32,14 @@ def file_mtime(path):
         .astimezone()
         .isoformat()
     )
+    
+    
+def getdifflines(fromfile, tofile, encoding):
+    with open(fromfile, encoding=encoding) as ff:
+        fromlines = ff.readlines()
+    with open(tofile, encoding=encoding) as tf:
+        tolines = tf.readlines()
+    return fromlines, tolines
 
     
 def main():
@@ -47,6 +58,7 @@ def main():
     fromfile = options.fromfile
     tofile = options.tofile
     
+    makehtml = False
     if options.makehtml and options.outfile:
         print("-m and -o not allowed together", file=sys.stderr)
         sys.exit(1)
@@ -55,17 +67,16 @@ def main():
         makehtml = True
     elif options.outfile:
         outfile = options.outfile
-        makehtml = False
     else:
         outfile = ""
-        makehtml = False
 
     fromdate = file_mtime(fromfile)
     todate = file_mtime(tofile)
-    with open(fromfile) as ff:
-        fromlines = ff.readlines()
-    with open(tofile) as tf:
-        tolines = tf.readlines()
+
+    if outfile:
+        fromlines, tolines = getdifflines(fromfile, tofile, ENCODING)
+    else:
+        fromlines, tolines = getdifflines(fromfile, tofile, None)
 
     if options.unified:
         diff = difflib.unified_diff(fromlines, tolines, fromfile, tofile, fromdate, todate, n=lines)
@@ -78,7 +89,8 @@ def main():
         diff = difflib.context_diff(fromlines, tolines, fromfile, tofile, fromdate, todate, n=lines)
 
     if outfile:
-        print("Outfile:", outfile)
+        with open(outfile, "w", encoding=ENCODING) as f:
+            f.writelines(diff)
     else:
         sys.stdout.writelines(diff)
 
